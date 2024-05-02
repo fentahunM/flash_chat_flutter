@@ -10,7 +10,44 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  AnimationController? controller;
+  Animation? animation;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+
+    animation = CurvedAnimation(parent: controller!, curve: Curves.easeIn);
+
+    controller!.forward();
+    // controller!.reverse(from: 1.0);
+
+    controller!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller!.reverse(from: 1.0);
+      } else if (status == AnimationStatus.dismissed) {
+        controller!.forward();
+      }
+    });
+
+    controller!.addListener(() {
+      setState(() {});
+      print(animation!.value);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller!.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +63,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Hero(
                   tag: 'logo',
                   child: SizedBox(
-                    height: 60.0,
+                    height: animation!.value * 100,
                     child: Image.asset('images/logo.png'),
                   ),
                 ),
@@ -35,6 +72,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   style: TextStyle(
                     fontSize: 45.0,
                     fontWeight: FontWeight.w900,
+                    color: Colors.black,
                   ),
                 ),
               ],
